@@ -18,6 +18,11 @@ defmodule BrainlessWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+
+    live "/books", BookLive.Index, :index
+    live "/books/new", BookLive.Form, :new
+    live "/books/:id", BookLive.Show, :show
+    live "/books/:id/edit", BookLive.Form, :edit
   end
 
   # Other scopes may use custom stacks.
