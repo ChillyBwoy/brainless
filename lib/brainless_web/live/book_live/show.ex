@@ -35,9 +35,11 @@ defmodule BrainlessWeb.BookLive.Show do
 
   @impl true
   def mount(%{"id" => id}, _session, socket) do
+    book = Shop.get_book!(id)
+
     {:ok,
      socket
      |> assign(:page_title, "Show Book")
-     |> assign(:book, Shop.get_book!(id))}
+     |> assign(:book, book)}
   end
 end

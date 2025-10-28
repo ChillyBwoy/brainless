@@ -8,19 +8,17 @@ defmodule Brainless.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      {Nx.Serving,
-       serving: Brainless.Rag.Embedding.serving(),
-       name: Brainless.RagEmbeddingServing,
-       batch_size: 5,
-       batch_timeout: 1000},
-      {Nx.Serving,
-       serving: Brainless.Rag.Generation.serving(),
-       name: Brainless.RagGenerationServing,
-       batch_size: 5,
-       batch_timeout: 1000},
       BrainlessWeb.Telemetry,
       Brainless.Repo,
       {DNSCluster, query: Application.get_env(:brainless, :dns_cluster_query) || :ignore},
+      {Nx.Serving,
+       name: Brainless.Rag.Embedding,
+       batch_timeout: 50,
+       serving: Brainless.Rag.Embedding.serving()},
+      {Nx.Serving,
+       name: Brainless.Rag.Generation,
+       batch_timeout: 50,
+       serving: Brainless.Rag.Generation.serving()},
       {Phoenix.PubSub, name: Brainless.PubSub},
       # Start a worker by calling: Brainless.Worker.start_link(arg)
       # {Brainless.Worker, arg},

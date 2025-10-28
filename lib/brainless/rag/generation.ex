@@ -1,5 +1,4 @@
 defmodule Brainless.Rag.Generation do
-  # @model_repo {:hf, "intfloat/e5-large-v2"}
   @model_repo {:hf, "mistralai/Mistral-7B-Instruct-v0.2"}
 
   def serving do

@@ -19,7 +19,16 @@ defmodule Brainless.Shop.Book do
   @doc false
   def changeset(book, attrs) do
     book
-    |> cast(attrs, [:name, :description, :price, :is_available, :isbn, :author, :published_at])
+    |> cast(attrs, [
+      :name,
+      :description,
+      :price,
+      :is_available,
+      :isbn,
+      :author,
+      :published_at,
+      :embedding
+    ])
     |> validate_required([
       :name,
       :description,
