@@ -4,9 +4,23 @@ defmodule Brainless.MediaLibrary do
   """
 
   import Ecto.Query, warn: false
+  import Pgvector.Ecto.Query
+
   alias Brainless.Repo
 
-  alias Brainless.MediaLibrary.Movie
+  alias Brainless.MediaLibrary.{Movie, Genre, Person}
+
+  def create_genre(attrs) do
+    %Genre{}
+    |> Genre.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def create_person(attrs) do
+    %Person{}
+    |> Person.changeset(attrs)
+    |> Repo.insert()
+  end
 
   @doc """
   Returns the list of movies.
@@ -100,5 +114,24 @@ defmodule Brainless.MediaLibrary do
   """
   def change_movie(%Movie{} = movie, attrs \\ %{}) do
     Movie.changeset(movie, attrs)
+  end
+
+  def retrieve_movies(vector, opts \\ []) when is_list(vector) do
+    query =
+      from movie in Movie,
+        order_by: l2_distance(movie.embedding, ^Pgvector.new(vector)),
+        limit: 10
+
+    Enum.reduce(opts, query, fn
+      {:limit, bindings}, query ->
+        from q in exclude(query, :limit), limit: ^bindings
+
+      {:preload, bindings}, query ->
+        preload(query, ^bindings)
+
+      _, query ->
+        query
+    end)
+    |> Repo.all()
   end
 end
