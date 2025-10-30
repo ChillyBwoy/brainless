@@ -21,34 +21,46 @@ defmodule Mix.Tasks.BuildIndex do
     end
   end
 
-  defp update_movies_embeddings(:gemini) do
-    MediaLibrary.list_movies()
-    |> Enum.chunk_every(50)
-    |> Enum.map(fn movies ->
-      texts = Enum.map(movies, & &1.description)
-
+  defp update_embeddings(:gemini, all_items, chunks, get_index_data, get_entity_repr, update) do
+    all_items
+    |> Enum.chunk_every(chunks)
+    |> Enum.map(fn items ->
+      texts = Enum.map(items, &get_index_data.(&1))
       {:ok, embeddings} = Embedding.predict_many(:gemini, texts)
 
-      if length(embeddings) != length(movies) do
-        raise "embeddings size != movies size"
+      if length(embeddings) != length(items) do
+        raise "embeddings size != items size"
       end
 
-      Enum.with_index(movies)
-      |> Enum.map(fn {movie, idx} ->
+      Enum.with_index(items)
+      |> Enum.map(fn {entity, idx} ->
         embedding = Enum.at(embeddings, idx)
 
-        case MediaLibrary.update_movie(movie, %{embedding: embedding}) do
-          {:ok, updated_movie} ->
-            dbg({"updated", movie.id, movie.title})
-            updated_movie
+        case update.(entity, embedding) do
+          {:ok, updated_entity} ->
+            IO.puts("ok: #{get_entity_repr.(updated_entity)}")
+            updated_entity
 
-          {:error, changeset} ->
-            dbg({"error", movie.id, movie.title, changeset.errors})
-            movie
+          {:error, _changeset} ->
+            IO.puts("error: #{get_entity_repr.(entity)}")
+            entity
         end
       end)
     end)
     |> List.flatten()
+  end
+
+  defp update_movies_embeddings(:gemini) do
+    movies = MediaLibrary.list_movies()
+
+    update_embeddings(
+      :gemini,
+      movies,
+      50,
+      & &1.description,
+      &"Movie [#{&1.id}] #{&1.title}",
+      &MediaLibrary.update_movie(&1, %{embedding: &2})
+    )
   end
 
   defp update_movies_embeddings(:bumblebee) do
@@ -56,33 +68,16 @@ defmodule Mix.Tasks.BuildIndex do
   end
 
   defp update_books_embeddings(:gemini) do
-    Shop.list_books()
-    |> Enum.chunk_every(50)
-    |> Enum.map(fn books ->
-      texts = Enum.map(books, & &1.description)
+    books = Shop.list_books()
 
-      {:ok, embeddings} = Embedding.predict_many(:gemini, texts)
-
-      if length(embeddings) != length(books) do
-        raise "embeddings size != books size"
-      end
-
-      Enum.with_index(books)
-      |> Enum.map(fn {book, idx} ->
-        embedding = Enum.at(embeddings, idx)
-
-        case Shop.update_book(book, %{embedding: embedding}) do
-          {:ok, updated_book} ->
-            dbg({"updated", book.id, book.name})
-            updated_book
-
-          {:error, changeset} ->
-            dbg({"error", book.id, book.name, changeset.errors})
-            book
-        end
-      end)
-    end)
-    |> List.flatten()
+    update_embeddings(
+      :gemini,
+      books,
+      50,
+      & &1.description,
+      &"Book: [#{&1.id}] [#{&1.name}]",
+      &Shop.update_book(&1, %{embedding: &2})
+    )
   end
 
   defp update_books_embeddings(:bumblebee) do

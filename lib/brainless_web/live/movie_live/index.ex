@@ -4,37 +4,16 @@ defmodule BrainlessWeb.MovieLive.Index do
   import Ecto.Query
   import Pgvector.Ecto.Query
 
+  alias Brainless.Rag.Embedding
   alias Brainless.Repo
   alias Brainless.MediaLibrary
   alias Brainless.MediaLibrary.Movie
-  alias Brainless.Rag.Embedding
-
-  defmodule BrainlessWeb.MovieLive.Index.SearchForm do
-    use Ecto.Schema
-    import Ecto.Changeset
-
-    @primary_key false
-    embedded_schema do
-      field :query, :string
-    end
-
-    def changeset(search_form, attrs) do
-      search_form
-      |> cast(attrs, [:query])
-      |> validate_required([:query])
-    end
-  end
-
-  alias BrainlessWeb.MovieLive.Index.SearchForm
 
   @impl true
   def mount(_params, _session, socket) do
-    search_form = SearchForm.changeset(%SearchForm{}, %{}) |> to_form()
-
     {:ok,
      socket
      |> assign(:page_title, "Listing Movies")
-     |> assign(:search_form, search_form)
      |> stream(:movies, [])}
   end
 
@@ -47,7 +26,7 @@ defmodule BrainlessWeb.MovieLive.Index do
   end
 
   @impl true
-  def handle_event("search", %{"search_form" => %{"query" => query}}, socket) do
+  def handle_event("search", %{"query" => query}, socket) do
     query = String.trim(query)
 
     movies =
@@ -79,14 +58,10 @@ defmodule BrainlessWeb.MovieLive.Index do
         </:actions>
       </.header>
 
-      <.form
-        for={@search_form}
-        id="search-form"
-        phx-submit="search"
-      >
-        <.input field={@search_form[:query]} type="text" />
+      <form phx-submit="search">
+        <.input type="text" name="query" value="" />
         <.button phx-disable-with="..." variant="primary">Search</.button>
-      </.form>
+      </form>
 
       <.table
         id="movies"

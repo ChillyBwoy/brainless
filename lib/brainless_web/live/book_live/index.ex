@@ -4,38 +4,17 @@ defmodule BrainlessWeb.BookLive.Index do
   import Ecto.Query
   import Pgvector.Ecto.Query
 
+  alias Brainless.Rag.Embedding
   alias Brainless.Repo
   alias Brainless.Shop
   alias Brainless.Shop.Book
 
-  defmodule BrainlessWeb.BookLive.Index.SearchForm do
-    use Ecto.Schema
-    import Ecto.Changeset
-
-    @primary_key false
-    embedded_schema do
-      field :query, :string
-    end
-
-    def changeset(search_form, attrs) do
-      search_form
-      |> cast(attrs, [:query])
-      |> validate_required([:query])
-    end
-  end
-
-  alias BrainlessWeb.BookLive.Index.SearchForm
-
   @impl true
   def mount(_params, _session, socket) do
-    books = Shop.list_books()
-    search_form = SearchForm.changeset(%SearchForm{}, %{}) |> to_form()
-
     {:ok,
      socket
      |> assign(:page_title, "Listing Books")
-     |> assign(:search_form, search_form)
-     |> stream(:books, books)}
+     |> stream(:books, [])}
   end
 
   @impl true
@@ -47,15 +26,14 @@ defmodule BrainlessWeb.BookLive.Index do
   end
 
   @impl true
-  def handle_event("search", %{"search_form" => %{"query" => query}}, socket) do
+  def handle_event("search", %{"query" => query}, socket) do
     query = String.trim(query)
 
     books =
       if String.length(query) == 0 do
-        Shop.list_books()
+        []
       else
-        {:ok, %{values: vector}} =
-          ExLLM.Providers.Gemini.Embeddings.embed_text("models/text-embedding-004", query)
+        {:ok, vector} = Embedding.predict(:gemini, query)
 
         Repo.all(
           from book in Book,
@@ -80,14 +58,10 @@ defmodule BrainlessWeb.BookLive.Index do
         </:actions>
       </.header>
 
-      <.form
-        for={@search_form}
-        id="search-form"
-        phx-submit="search"
-      >
-        <.input field={@search_form[:query]} type="text" />
+      <form phx-submit="search">
+        <.input type="text" name="query" value="" />
         <.button phx-disable-with="..." variant="primary">Search</.button>
-      </.form>
+      </form>
 
       <.table
         id="books"
