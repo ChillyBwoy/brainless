@@ -116,8 +116,4 @@ if config_env() == :prod do
   #     config :swoosh, :api_client, Swoosh.ApiClient.Req
   #
   # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
-
-  config :brainless, Brainless.Rag,
-    provider: System.get_env("RAG_PROVIDER"),
-    hf_token: System.get_env("RAG_HF_TOKEN")
 end

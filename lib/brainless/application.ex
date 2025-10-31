@@ -29,28 +29,36 @@ defmodule Brainless.Application do
       {Phoenix.PubSub, name: Brainless.PubSub}
     ]
 
-    case Brainless.Rag.Config.provider() do
-      :bumblebee ->
-        base_children ++
-          [
-            {Nx.Serving,
-             name: Brainless.Rag.Embedding.Bumblebee,
-             batch_timeout: 50,
-             serving: Brainless.Rag.Embedding.Bumblebee.serving()},
-            {Nx.Serving,
-             name: Brainless.Rag.Generation.Bumblebee,
-             batch_timeout: 50,
-             serving: Brainless.Rag.Generation.Bumblebee.serving()},
-            # Start to serve requests, typically the last entry
-            BrainlessWeb.Endpoint
-          ]
+    base_children =
+      case Brainless.Rag.Config.embedding_provider() do
+        :bumblebee ->
+          base_children ++
+            [
+              {Nx.Serving,
+               name: Brainless.Rag.Embedding.Bumblebee,
+               batch_timeout: 50,
+               serving: Brainless.Rag.Embedding.Bumblebee.serving()}
+            ]
 
-      _ ->
-        base_children ++
-          [
-            # Start to serve requests, typically the last entry
-            BrainlessWeb.Endpoint
-          ]
-    end
+        _ ->
+          base_children
+      end
+
+    # base_children =
+    #   case Brainless.Rag.Config.generation_provider() do
+    #     :bumblebee ->
+    #       base_children ++
+    #         [
+    #           {Nx.Serving,
+    #            name: Brainless.Rag.Generation.Bumblebee,
+    #            batch_timeout: 50,
+    #            serving: Brainless.Rag.Generation.Bumblebee.serving()}
+    #         ]
+
+    #     _ ->
+    #       base_children
+    #   end
+
+    base_children ++ [BrainlessWeb.Endpoint]
   end
 end

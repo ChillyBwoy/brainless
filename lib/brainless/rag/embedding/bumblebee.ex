@@ -14,7 +14,7 @@ defmodule Brainless.Rag.Embedding.Bumblebee do
     {:ok, model_info} = Bumblebee.load_model(@model_repo)
     {:ok, tokenizer} = Bumblebee.load_tokenizer(@model_repo)
 
-    Logger.info("Starting Bumblebee...")
+    Logger.info("Starting Bumblebee embedding...")
 
     Bumblebee.Text.text_embedding(model_info, tokenizer,
       embedding_processor: :l2_norm,
@@ -28,8 +28,11 @@ defmodule Brainless.Rag.Embedding.Bumblebee do
   @spec to_vector(any()) :: {:error, <<_::40>>} | {:ok, any()}
   def to_vector(input) do
     case Nx.Serving.batched_run(__MODULE__, input) do
-      %{embedding: embedding} -> {:ok, embedding}
-      _ -> {:error, "error"}
+      %{embedding: embedding} ->
+        {:ok, embedding |> Nx.to_list()}
+
+      _ ->
+        {:error, "error"}
     end
   end
 
@@ -37,7 +40,8 @@ defmodule Brainless.Rag.Embedding.Bumblebee do
   def to_vector_list(inputs) do
     case Nx.Serving.batched_run(__MODULE__, inputs) do
       values when is_list(values) ->
-        {:ok, Enum.map(values, fn %{embedding: embedding} -> embedding end)}
+        embeddings = Enum.map(values, fn %{embedding: embedding} -> Nx.to_list(embedding) end)
+        {:ok, embeddings}
 
       _ ->
         {:error, "error"}

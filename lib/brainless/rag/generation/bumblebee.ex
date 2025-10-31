@@ -1,5 +1,6 @@
 defmodule Brainless.Rag.Generation.Bumblebee do
   use Brainless.Rag.Generation.Provider
+  require Logger
 
   @model_repo {:hf, "mistralai/Mistral-7B-Instruct-v0.2"}
 
@@ -8,6 +9,8 @@ defmodule Brainless.Rag.Generation.Bumblebee do
     {:ok, model_info} = Bumblebee.load_model(@model_repo)
     {:ok, tokenizer} = Bumblebee.load_tokenizer(@model_repo)
     {:ok, generation_config} = Bumblebee.load_generation_config(@model_repo)
+
+    Logger.info("Starting Bumblebee generator...")
 
     Bumblebee.Text.generation(model_info, tokenizer, generation_config,
       compile: [batch_size: 1, sequence_length: 1028],
