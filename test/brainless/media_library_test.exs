@@ -8,7 +8,16 @@ defmodule Brainless.MediaLibraryTest do
 
     import Brainless.MediaLibraryFixtures
 
-    @invalid_attrs %{description: nil, title: nil, poster_url: nil, genre: nil, director: nil, release_date: nil, imdb_rating: nil, meta_score: nil}
+    @invalid_attrs %{
+      description: nil,
+      title: nil,
+      poster_url: nil,
+      genre: nil,
+      director: nil,
+      release_date: nil,
+      imdb_rating: nil,
+      meta_score: nil
+    }
 
     test "list_movies/0 returns all movies" do
       movie = movie_fixture()
@@ -21,7 +30,16 @@ defmodule Brainless.MediaLibraryTest do
     end
 
     test "create_movie/1 with valid data creates a movie" do
-      valid_attrs = %{description: "some description", title: "some title", poster_url: "some poster_url", genre: "some genre", director: "some director", release_date: ~D[2025-10-28], imdb_rating: 120.5, meta_score: 42}
+      valid_attrs = %{
+        description: "some description",
+        title: "some title",
+        poster_url: "some poster_url",
+        genre: "some genre",
+        director: "some director",
+        release_date: ~D[2025-10-28],
+        imdb_rating: 120.5,
+        meta_score: 42
+      }
 
       assert {:ok, %Movie{} = movie} = MediaLibrary.create_movie(valid_attrs)
       assert movie.description == "some description"
@@ -40,7 +58,17 @@ defmodule Brainless.MediaLibraryTest do
 
     test "update_movie/2 with valid data updates the movie" do
       movie = movie_fixture()
-      update_attrs = %{description: "some updated description", title: "some updated title", poster_url: "some updated poster_url", genre: "some updated genre", director: "some updated director", release_date: ~D[2025-10-29], imdb_rating: 456.7, meta_score: 43}
+
+      update_attrs = %{
+        description: "some updated description",
+        title: "some updated title",
+        poster_url: "some updated poster_url",
+        genre: "some updated genre",
+        director: "some updated director",
+        release_date: ~D[2025-10-29],
+        imdb_rating: 456.7,
+        meta_score: 43
+      }
 
       assert {:ok, %Movie{} = movie} = MediaLibrary.update_movie(movie, update_attrs)
       assert movie.description == "some updated description"

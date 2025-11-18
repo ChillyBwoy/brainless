@@ -4,9 +4,36 @@ defmodule BrainlessWeb.MovieLiveTest do
   import Phoenix.LiveViewTest
   import Brainless.MediaLibraryFixtures
 
-  @create_attrs %{description: "some description", title: "some title", poster_url: "some poster_url", genre: "some genre", director: "some director", release_date: "2025-10-28", imdb_rating: 120.5, meta_score: 42}
-  @update_attrs %{description: "some updated description", title: "some updated title", poster_url: "some updated poster_url", genre: "some updated genre", director: "some updated director", release_date: "2025-10-29", imdb_rating: 456.7, meta_score: 43}
-  @invalid_attrs %{description: nil, title: nil, poster_url: nil, genre: nil, director: nil, release_date: nil, imdb_rating: nil, meta_score: nil}
+  @create_attrs %{
+    description: "some description",
+    title: "some title",
+    poster_url: "some poster_url",
+    genre: "some genre",
+    director: "some director",
+    release_date: "2025-10-28",
+    imdb_rating: 120.5,
+    meta_score: 42
+  }
+  @update_attrs %{
+    description: "some updated description",
+    title: "some updated title",
+    poster_url: "some updated poster_url",
+    genre: "some updated genre",
+    director: "some updated director",
+    release_date: "2025-10-29",
+    imdb_rating: 456.7,
+    meta_score: 43
+  }
+  @invalid_attrs %{
+    description: nil,
+    title: nil,
+    poster_url: nil,
+    genre: nil,
+    director: nil,
+    release_date: nil,
+    imdb_rating: nil,
+    meta_score: nil
+  }
   defp create_movie(_) do
     movie = movie_fixture()
 
