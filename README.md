@@ -8,3 +8,8 @@ Create `.env` file (see `.env.example`)
 4. Build index `$ mix build_index`
 
 Now you can start the server. Check `/movies` route
+
+## Datasets
+
+- [Tokyo Restaurant Reviews on Tabelog](https://www.kaggle.com/datasets/utm529fg/tokyo-restaurant-reviews-on-tabelog)
+- [Shibuya Toilet](https://www.kaggle.com/datasets/shunkogiso/toilet-shibuya)
